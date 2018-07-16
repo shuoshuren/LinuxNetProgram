@@ -1,19 +1,20 @@
 .PHONY:clean
 
-CFLAGS = -Iadd -Isub -O2
-OBJSDIR = objs
-VPATH = add:sub:.
+CFLAGS = -O2
+export OBJSDIR = ${shell pwd}/objs
 TARGET = cacu
 OBJS = add_int.o add_float.o sub_int.o sub_float.o main.o
 
-$(TARGET):$(OBJSDIR) $(OBJS)
+$(TARGET):$(OBJSDIR) main.o
+	$(MAKE) -C add
+	$(MAKE) -C sub
 	$(CC) -o $(TARGET) $(OBJSDIR)/*.o  $(CFLAGS)
 
-$(OBJS):%.o:%.c
-	$(CC) -c $(CFLAGS) $< -o $(OBJSDIR)/$@
+main.o:%.o:%.c
+	$(CC) -c $< -o $(OBJSDIR)/$@
 
 $(OBJSDIR):
-	mkdir -p $@
+	mkdir -p $(OBJSDIR)
 
 clean:
 	-$(RM) $(TARGET)
