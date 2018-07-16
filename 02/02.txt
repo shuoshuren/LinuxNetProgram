@@ -1,0 +1,24 @@
+gcc 命令
+gcc hello.c:直接将代码编译成可执行文件a.out
+gcc -o:可以指定编译程序生成指定文件名
+gcc -c:用于生成目标文件 .o
+gcc -E:告诉编译器进行预编译操作
+gcc -S:生成汇编语言
+
+ar(静态连接库)命令
+ar -rcs:生成静态库，或者将一个obj文件加到已经存在的静态库
+gcc -shared :生成动态链接库，
+    -fpic选项作用是使得gcc生成的代码是位置无关 
+    -soname:表示生成动态库的别名
+    -o:表明生成的实际动态链接库文件
+gcc -l库名：编译程序时，使用动态链接库和静态链接库
+    -L:指定链接动态链接库的路径
+
+动态加载库：动态加载库可以用程序的方法来控制什么时候加载
+    dlopen():代码动态库,flag为打开方式，一般为RTLD_LAZY
+            void * dlopen(const char *filename,int flag);
+    dlsym():获得动态链接库指定函数的指针，可以使用这个函数指针进行操作
+            void * dlsym(void *handle,char *symbol);//handle:打开动态库返回的句柄，symbol:函数名称，返回值为函数指针
+
+
+
