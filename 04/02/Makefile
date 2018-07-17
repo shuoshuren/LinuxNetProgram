@@ -1,12 +1,15 @@
 .PHONY:clean
 
-SRCS = getpid.c
+SRCS = getpid.c fork.c
 
 TARGET= $(patsubst %.c, %, $(SRCS))
 
-
-$(TARGET):$(SRCS)
+getpid:getpid.c
 	$(CC) -o $@ $<
+
+fork:fork.c
+	$(CC) -o $@ $<
+
 
 
 clean:
