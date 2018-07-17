@@ -35,7 +35,11 @@ fcntl02:fcntl-02.c
 	$(CC) -o $@  $< 
 
 
+ioctl01:ioctl-01.c
+	$(CC) -o $@  $< 
+
+
 clean:
 	-$(RM) *.o
 	-$(RM) open01 open02 close read01 write01 lseek01 \
-        lseek02 fstat mmap fcntl01 fcntl02
+        lseek02 fstat mmap fcntl01 fcntl02 ioctl01
