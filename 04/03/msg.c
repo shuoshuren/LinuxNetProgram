@@ -5,6 +5,7 @@
 #include <sys/msg.h>
 #include <unistd.h>
 #include <sys/ipc.h>
+#include <time.h>
 
 void show_msg(int msg_id,struct msqid_ds msg_info){
     int ret = -1;
@@ -42,7 +43,7 @@ int main(void){
 
     int msg_sflags,msg_rflags;
     
-    char *msgpath = "/ipc/msg/";//消息key产生所用的路径
+    char *msgpath = "/tmp";//消息key产生所用的路径
     key = ftok(msgpath,'b');//产生key
     if(key != -1){
         printf("成功建立key\n");

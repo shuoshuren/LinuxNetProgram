@@ -17,7 +17,7 @@ sem_t create_sem(key_t key,int value){
     sem_t semid;
     sem.val = value;
 
-    semid = semget(key,0,IPC_CREAT|0x666);
+    semid = semget(key,1,IPC_CREAT|0666);
     if(-1 == semid){
         printf("create semaphore error\n");
         return -1;
@@ -72,7 +72,7 @@ int main(void){
     struct semid_ds buf;
     int value;
 
-    key = ftok(".",'a');
+    key = ftok("/tmp",'a');
 
     semid = create_sem(key,100);
     
