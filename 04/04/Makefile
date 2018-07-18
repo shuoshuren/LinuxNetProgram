@@ -7,5 +7,8 @@ pthread:pthread.c
 mutex:mutex.c
 	$(CC) -o $@ $< -lpthread
 
+sem:sem.c
+	$(CC) -o $@ $< -lpthread
+
 clean:
-	$(RM) pthread mutex
+	$(RM) pthread mutex sem
