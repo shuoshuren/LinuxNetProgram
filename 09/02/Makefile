@@ -1,5 +1,5 @@
 
-PROCESS_SRC = process_recv_send.c
+PROCESS_SRC = process_recv_send_msg.c
 
 
 client:client.c $(PROCESS_SRC)
