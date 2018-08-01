@@ -40,7 +40,7 @@ static void handle_connect(int s_s) {
 	int s_c;
 	struct sockaddr_in from;
 	int len = sizeof(from);
-	pthread_t = thread_to;
+	pthread_t thread_to;
 
 	while (1) {
 		s_c = accept(s_s, (struct sockaddr *)&from, &len);
