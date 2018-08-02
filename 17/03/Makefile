@@ -1,8 +1,15 @@
-obj-m:=hello_world_module.o
+target = hello_world_module
+obj-m:= $(target).o
 KDIR :=/lib/modules/$(shell uname -r)/build
 PWD:=$(shell pwd)
-all:
+default:
 	$(MAKE) -C $(KDIR) M=$(PWD) modules
+
+install:
+	insmod $(target).ko
+
+uninstall:
+	rmmod $(target).ko
 
 clean:
 	$(RM) *.ko *.o *.symvers 
