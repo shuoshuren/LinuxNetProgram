@@ -86,7 +86,7 @@ int cgi_handler(struct worker_ctl *wctl){
         while (size >0 && !end){
             size = read(pipe_out[READIN],res->res.ptr,sizeof(wctl->conn.dres));
             if(size>0){
-                send(wctl->conn.cs,res->res.ptr,strlen(res->res.ptr));
+                send(wctl->conn.cs,res->res.ptr,strlen(res->res.ptr),0);
             }else{
                 end = 1;
             }
@@ -190,7 +190,7 @@ int generate_dir_file(struct worker_ctl *wctl){
                 }else if(size_int < 1024*1024){
                     sprintf(size_str,"%1.2f Kbytes",(float) size_int/1024);
                 }else{
-                    sprintf(size_str,"%1.2f Mbytes",(float) size_int/(1024*1024);)
+                    sprintf(size_str,"%1.2f Mbytes",(float) size_int/(1024*1024));
                 }
                 sprintf(tempbuff,"<a href=\"%s\">%s</a><br/>\n",
                         de->d_name,linkname,size_int);
@@ -205,6 +205,7 @@ int generate_dir_file(struct worker_ctl *wctl){
     fs->st_size = filesize;
     fseek(tempfile,(long)0,SEEK_SET);
 
+    return filesize;
 
 }
 

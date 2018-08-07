@@ -11,6 +11,38 @@
 #include <memory.h>
 
 /**
+ * 监听socket
+ * @return
+ */
+ int do_listen(){
+    int s,err;
+    s = socket(AF_INET,SOCK_STREAM,0);
+    struct sockaddr_in server_addr;
+    if(s <0){
+        printf("socket error\n");
+        return -1;
+    }
+    bzero(&server_addr,sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    server_addr.sin_port = htons(conf_para.ListenPort);
+    //绑定
+    err = bind(s,(struct sockaddr*)&server_addr,sizeof(server_addr));
+    if(err<0){
+        printf("bind error\n");
+        return -1;
+    }
+    //设置监听
+    err = listen(s,conf_para.InitClient);
+    if(err<0){
+        printf("listen error\n");
+        return -1;
+    }
+    return s;
+
+}
+
+/**
  * 当有客户端连接来时，将客户端连接分配给空闲客户端，由客户端处理请求
  * @param ss
  * @return
@@ -138,7 +170,7 @@ static void worker_destroy(){
  * @return -1表示找不到
  */
 int worker_is_status(int status){
-    for (int i = 0; i < wctls.length; ++i) {
+    for (int i = 0; i < conf_para.MaxClient; ++i) {
         if(wctls[i].opts.flags == status){
             return i;
         }

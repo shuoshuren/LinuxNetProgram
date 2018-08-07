@@ -18,7 +18,7 @@ struct conf_opts{
     int     InitClient;         //初始化线程数量
 };
 
-extern struct conf_opts conf_para = {
+struct conf_opts conf_para = {
         /*CGIRoot*/         "/usr/local/var/www/cgi-bin",
         /*DefaultFile*/     "index.html",
         /*DocumentRoot*/    "/usr/local/var/www",
@@ -59,6 +59,13 @@ static int para_cmd_parse(int argc,char *argv[]);
  * @param file
  */
 static void para_file_parse(char *file);
+
+/**
+ * 参数初始化
+ * @param argc
+ * @param argv
+ */
+extern void para_init(int argc,char *argv[]);
 
 /**
  * 文件读取一行

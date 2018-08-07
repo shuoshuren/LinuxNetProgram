@@ -8,7 +8,14 @@
 #include <ctype.h>
 #include "config.h"
 
-static int conf_readline(int fd, char line[256], int i);
+/**
+ * 参数初始化
+ * @param argc
+ * @param argv
+ */
+ void para_init(int argc,char *argv[]){
+    para_cmd_parse(argc,argv);
+}
 
 /**
 * 命令行解析

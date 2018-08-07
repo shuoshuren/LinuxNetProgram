@@ -23,8 +23,13 @@ static int SCHEDULE_STATUS;
 
 static pthread_mutex_t thread_init;
 
-extern struct worker_ctl wctls[];
+extern struct worker_ctl* wctls;
 
+/**
+ * 套接字初始化
+ * @return
+ */
+extern int do_listen();
 
 /**
  * 当有客户端连接来时，将客户端连接分配给空闲客户端，由客户端处理请求

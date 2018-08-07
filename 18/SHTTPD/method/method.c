@@ -83,7 +83,7 @@ int method_get(struct worker_ctl *wctl){
         printf("request range:%d\n",req->ch.range.v_vec.len);
         n = sscanf(req->ch.range.v_vec.ptr,"bytes=%lu-%lu",&r1,r2);
     }
-    printf("n:%d\n",n);
+    printf("n:%ld\n",n);
     if(n>0){
         status = 206;
         (void) fseek(res->fd,r1,SEEK_SET);
@@ -96,7 +96,7 @@ int method_get(struct worker_ctl *wctl){
     //输出构建的头部数据
     memset(res->res.ptr,0,sizeof(wctl->conn.dres));
     snprintf(res->res.ptr,sizeof(wctl->conn.dres),
-            "HTTP/1.1 %d %s\r\n"
+            "HTTP/1.1 %ld %s\r\n"
             "Date: %s\r\n"
             "Last-Modified: %s\r\n"
             "Etag: \"%s\"\r\n"
