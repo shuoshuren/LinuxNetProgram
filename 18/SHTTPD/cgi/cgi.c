@@ -5,6 +5,7 @@
 #include <memory.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
+#include <dirent.h>
 #include "cgi.h"
 #include "../config/config.h"
 
@@ -47,6 +48,7 @@ int cgi_handler(struct worker_ctl *wctl){
     }
     else if((fs->st_mode & S_IFDIR) == S_IFDIR){
         //是一个目录
+        generate_dir_file(wctl);
     }else if((fs->st_mode & S_IXUSR) != S_IXUSR){
         //所指文件不能执行
         res->status = 403;
@@ -111,6 +113,98 @@ int cgi_handler(struct worker_ctl *wctl){
 
         execlp(rpath,arg);
     }
+
+}
+
+
+/**
+ * 判断当前目录下有一个与默认文件名一致的文件，如果没有，则将当前目录下所有目录列表处理
+ * @param wctl
+ * @return
+ */
+int generate_dir_file(struct worker_ctl *wctl){
+    struct conn_request *req = &wctl->conn.con_req;
+    struct conn_response *res = &wctl->conn.con_res;
+    char *command = strstr(req->uri,CGISTR) + strlen(CGISTR);
+    char *arg[ARGNUM];
+    int num=0;
+    char *rpath = wctl->conn.con_req.rpath;
+    struct stat *fs = &wctl->conn.con_res.fsate;
+    //打开目录
+    DIR *dir = opendir(rpath);
+    if(dir == NULL){
+        //错误
+        res->status= 500;
+        return -1;
+    }
+    //建立临时文件保存目录列表
+    FILE *tempfile;
+    char tempbuff[2048];
+    int filesize = 0;
+    char *uri = wctl->conn.con_req.uri;
+    tempfile = tmpfile();
+    //建立标题部分字符串
+    sprintf(tempbuff,"%s%s%s",
+            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">\n<HTML>"
+            "<HEAD><TITLE>",
+            uri,"</TITLE></HEAD>\n");
+    fprintf(tempfile,"%s",tempbuff);
+    filesize += strlen(tempbuff);
+    sprintf(tempbuff,
+            "%s %s %s","<BODY><H1>Index of:",
+            uri,
+            "</H1> <hr><p><i>Date:</i><i>Size:</i></p><hr>");
+    fprintf(tempfile,"%s",tempbuff);
+    filesize += strlen(tempbuff);
+    //读取目录中的文件列表
+    struct dirent *de;
+#define PATHLENGTH 2048
+    char path[PATHLENGTH];
+    char tmpath[PATHLENGTH];
+    char linkname[PATHLENGTH];
+    strcpy(path,rpath);
+    if(rpath[strlen(rpath)]!='/'){
+        rpath[strlen(rpath)] = '/';
+    }
+    while ((de = readdir(dir)) != NULL){//读取文件
+        memset(tmpath,0,sizeof(tmpath));
+        memset(linkname,0,sizeof(linkname));
+        if(strcmp(de->d_name,".")){//不是当前目录
+            if(strcmp(de->d_name,"..")){//不是父目录
+                strcpy(linkname,de->d_name);//将目录名称作为连接名称
+            }else{
+                strcpy(linkname,"Parent Directory");
+            }
+            sprintf(tmpath,"%s%s",path,de->d_name);
+            stat(tmpath,&fs);
+            if(S_ISDIR(fs->st_mode)){//是目录
+                sprintf(tempbuff,"<a href=\"%s/\">%s/</a><br/>\n",
+                        de->d_name,tmpath);
+            }else{
+                char size_str[32];
+                off_t  size_int;
+                size_int = fs->st_size;
+                if(size_int <1024){
+                    sprintf(size_str,"%d bytes",(int)size_int);
+
+                }else if(size_int < 1024*1024){
+                    sprintf(size_str,"%1.2f Kbytes",(float) size_int/1024);
+                }else{
+                    sprintf(size_str,"%1.2f Mbytes",(float) size_int/(1024*1024);)
+                }
+                sprintf(tempbuff,"<a href=\"%s\">%s</a><br/>\n",
+                        de->d_name,linkname,size_int);
+            }
+            fprintf(tempfile,"%s",tempbuff);
+            filesize += strlen(tempbuff);
+        }
+    }
+    //生成临时文件信息
+    fs->st_ctim.tv_sec = time(NULL);
+    fs->st_mtim.tv_sec = time(NULL);
+    fs->st_size = filesize;
+    fseek(tempfile,(long)0,SEEK_SET);
+
 
 }
 
