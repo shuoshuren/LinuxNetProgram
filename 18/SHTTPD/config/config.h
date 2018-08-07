@@ -18,7 +18,7 @@ struct conf_opts{
     int     InitClient;         //初始化线程数量
 };
 
-struct conf_opts conf_para = {
+extern struct conf_opts conf_para = {
         /*CGIRoot*/         "/usr/local/var/www/cgi-bin",
         /*DefaultFile*/     "index.html",
         /*DocumentRoot*/    "/usr/local/var/www",
