@@ -126,6 +126,33 @@ void method_head(struct worker_ctl *wctl);
 
 void method_list(struct worker_ctl *wctl);
 
+/**
+ * 根据输入的扩展名查找内容类型的匹配项
+ * @param uri
+ * @param len
+ * @param wctl
+ * @return
+ */
 struct mine_type * Mine_Type(char *uri,size_t len,struct worker_ctl *wctl){
-    
+
+    printf("==> Mine_Type\n");
+    int i=0;
+    char *ext = memcpy(uri,'.',len);//查找扩展名的位置
+    struct mine_type *mine = NULL;
+    int found = 0;
+    ext++;
+    printf("uri:%s,len:%d,ext is %d,%s\n",uri,len,ext,ext);
+    for(mine = &builtin_mine_types[i];mine->extension != NULL;i++){
+        if(!strncmp(mine->extension,ext,mine->ext_len)){
+            found = 1;
+            printf("found it,ext is %s\n",mine->extension);
+            break;
+        }
+    }
+    if(!found){
+        mine = &builtin_mine_types[2];
+    }
+    printf("<== Mine_Type\n");
+
+    return mine;
 }
