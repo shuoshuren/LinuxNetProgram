@@ -156,3 +156,37 @@ struct mine_type * Mine_Type(char *uri,size_t len,struct worker_ctl *wctl){
 
     return mine;
 }
+
+/**
+ * 生成错误类型
+ * @param wctl
+ * @return
+ */
+int generate_error_mine(struct worker_ctl * wctl){
+    struct error_mine *err = NULL;
+    int i=0;
+    for(err = &_error_http[i];err->error_code!=wctl->conn.con_res.status;i++){
+        ;
+    }
+    if(err->error_code!=wctl->conn.con_res.status){
+        err = &_error_http[0];
+    }
+    snprintf(
+            wctl->conn.dres,
+            sizeof(wctl->conn.dres),
+            "HTTP/%lu.%lu %d %s\r\n"
+            "Content-Type:%s\r\n"
+            "Content-Length:%d\r\n"
+            "\r\n"
+            "%s",
+            wctl->conn.con_req.major,
+            wctl->conn.con_req.minor,
+            err->error_code,
+            err->msg,
+            "text/plain",
+            strlen(err->content),
+            err->content);
+    wctl->conn.con_res.cl = strlen(err->content);
+    wctl->conn.con_res.fd = -1;
+    wctl->conn.con_res.status = err->error_code;
+}

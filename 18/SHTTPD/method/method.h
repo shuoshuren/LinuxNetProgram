@@ -76,6 +76,55 @@ struct mine_type builtin_mine_types[] = {
         {NULL,-1,0,NULL}
 };
 
+enum{
+    ERROR301 = 301,ERROR302=302, ERROR303,
+    ERROR304,ERROR305,ERROR307=307,
+    ERROR400=400,ERROR401,ERROR402,ERROR403,ERROR404,ERROR405,
+    ERROR406,ERROR407,ERROR408,ERROR409,ERROR410,ERROR411,ERROR412,
+    ERROR413,ERROR414,ERROR415,ERROR416,ERROR417,
+    ERROR500=500,ERROR501,ERROR502,ERROR503,ERROR504,ERROR505
+};
+
+struct error_mine{
+    int error_code;//错误代码
+    char *content;//错误信息
+    char *msg;//含义
+};
+struct error_mine _error_http[]={
+        {ERROR301,"Error: 301","永久移动"},
+        {ERROR302,"Error: 302","创建"},
+        {ERROR303,"Error: 303","观察别的部分"},
+        {ERROR304,"Error: 304","只读"},
+        {ERROR305,"Error: 305","用户代理"},
+        {ERROR307,"Error: 307","临时重发"},
+
+        {ERROR400,"Error: 400","坏请求"},
+        {ERROR401,"Error: 401","未授权"},
+        {ERROR402,"Error: 402","必要的支付"},
+        {ERROR403,"Error: 403","禁用"},
+        {ERROR404,"Error: 404","没找到"},
+        {ERROR405,"Error: 405","不允许的方式"},
+        {ERROR406,"Error: 406","不接受"},
+        {ERROR407,"Error: 407","需要代理验证"},
+        {ERROR408,"Error: 408","请求超时"},
+        {ERROR409,"Error: 409","冲突"},
+        {ERROR410,"Error: 410","停止"},
+        {ERROR411,"Error: 411","需要的长度"},
+        {ERROR412,"Error: 412","预处理失败"},
+        {ERROR413,"Error: 413","请求实体太大"},
+        {ERROR414,"Error: 414","请求URI太大"},
+        {ERROR415,"Error: 415","不支持的媒体类型"},
+        {ERROR416,"Error: 416","请求范围不满足"},
+        {ERROR417,"Error: 417","期望失败"},
+
+        {ERROR500,"Error: 500","服务器内部错误"},
+        {ERROR501,"Error: 501","不能实现"},
+        {ERROR502,"Error: 502","坏网关"},
+        {ERROR503,"Error: 503","服务不能实现"},
+        {ERROR504,"Error: 504","网关超时"},
+        {ERROR505,"Error: 505","HTTP版本不支持"},
+        {0,NULL,NULL}
+};
 
 /**
  * 方法的总函数
@@ -105,5 +154,12 @@ void method_list(struct worker_ctl *wctl);
  * @return
  */
 struct mine_type * Mine_Type(char *uri,size_t len,struct worker_ctl *wctl);
+
+/**
+ * 生成错误类型
+ * @param wctl
+ * @return
+ */
+int generate_error_mine(struct worker_ctl *wctl);
 
 #endif //SHTTPD_METHOD_H
