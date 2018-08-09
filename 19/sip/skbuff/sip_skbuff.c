@@ -69,7 +69,7 @@ void skb_clone(struct skbuff *from,struct skbuff *to){
  * @param len
  * @return
  */
-__uint8_t skb_put(struct skbuff *skb,__uint32_t len){
+__uint8_t* skb_put(struct skbuff *skb,__uint32_t len){
     printf("==>skb put\n");
     __uint8_t *tmp = skb->tail;//保存尾部指针位置
     skb->tail += len;//移动尾部指针

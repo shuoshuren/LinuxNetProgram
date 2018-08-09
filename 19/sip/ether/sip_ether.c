@@ -93,7 +93,7 @@ static __uint8_t * input(struct skbuff *pskb,struct net_device *dev){
             case ETH_P_ARP://ARP类型
                 skb->nh.arph = (struct sip_arphdr*)skb_put(skb,sizeof(struct sip_arphdr));
                 if(*((__uint32_t*)skb->nh.arph->ar_tip) == dev->ip_host.s_addr){
-                    arp_input(skb,dev);//ARP模块处理接收
+                    arp_input(&skb,dev);//ARP模块处理接收
                 }
                 skb_free(skb);
                 break;
