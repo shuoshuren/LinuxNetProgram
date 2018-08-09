@@ -3,6 +3,8 @@
 //
 
 #include "sip_skbuff.h"
+#include "../ether/sip_ether.h"
+#include "../ip/sip_ip.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <memory.h>
@@ -35,4 +37,44 @@ struct skbuff * skb_alloc(__uint32_t size){
     skb->len = 0;//当前结构中数据长度为0
     printf("<==skb alloc\n");
     return skb;
+}
+
+/**
+ * 释放函数
+ * @param skb
+ */
+void skb_free(struct skbuff *skb){
+    if(skb){
+        if(skb->head){
+            free(skb->head);
+        }
+        free(skb);
+    }
+}
+
+/**
+ * 复制skbuff
+ * @param from
+ * @param to
+ */
+void skb_clone(struct skbuff *from,struct skbuff *to){
+    memcpy(to->head,from->head,from->end-from->head);//复制用户数据
+    to->phy.ethh = (struct sip_ethhdr*)skb_put(to,ETH_LEN);//更改目的结构的以太网指针位置
+    to->nh.iph = (struct sip_iphdr*)skb_put(to,IPHDR_LEN);//更改IP头部的指针位置
+}
+
+/**
+ * 移动skbuff的tail指针
+ * @param skb
+ * @param len
+ * @return
+ */
+__uint8_t skb_put(struct skbuff *skb,__uint32_t len){
+    printf("==>skb put\n");
+    __uint8_t *tmp = skb->tail;//保存尾部指针位置
+    skb->tail += len;//移动尾部指针
+    skb->len -= len;//当前网络数据长度减少
+
+    printf("<==skb put\n");
+    return tmp;
 }

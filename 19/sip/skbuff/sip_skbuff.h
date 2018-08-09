@@ -48,10 +48,25 @@ struct skbuff{
  */
 struct skbuff * skb_alloc(__uint32_t size);
 
-void skb_free();
+/**
+ * 释放函数
+ * @param skb
+ */
+void skb_free(struct skbuff *skb);
 
-void skb_clone();
+/**
+ * 复制skbuff
+ * @param from
+ * @param to
+ */
+void skb_clone(struct skbuff *from,struct skbuff *to);
 
-void skb_put();
+/**
+ * 移动skbuff的tail指针
+ * @param skb
+ * @param len
+ * @return
+ */
+__uint8_t skb_put(struct skbuff *skb,__uint32_t len);
 
 #endif //SIP_SIP_SKBUFF_H
