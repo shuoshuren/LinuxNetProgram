@@ -28,6 +28,13 @@ struct sock {
     __uint16_t recv_avail;//可以接收数据
 };
 
+struct sip_socket{
+    struct sock *sock;//协议无关层结构指针
+    struct skbuff *lastdata;//最后接收的网络数据
+    __uint16_t lastoffset;//接收到网络数据的偏移量
+    int err;//错误值
+};
+
 /**
  * bind
  * @param sock
@@ -37,11 +44,82 @@ struct sock {
  */
 int sip_sock_bind(struct sock *sock,struct in_addr *addr,__uint16_t port);
 
+
+int sip_sock_connect(struct sock *sock, struct in_addr *ip, uint16_t port);
+
+
+void sip_sock_sendto(struct sock *sock, struct skbuff *skb, struct in_addr *ip, in_port_t port);
+
 /**
  * 接收函数
  * @param sock
  * @return
  */
 struct skbuff * sip_sock_recv(struct sock *sock);
+
+/**
+ * socket建立函数
+ * @param domain
+ * @param type
+ * @param protocol
+ * @return
+ */
+int sip_socket(int domain,int type,int protocol);
+
+/**
+ * 套接字关闭函数
+ * @param s
+ * @return
+ */
+int sip_close(int s);
+
+/**
+ * socket绑定函数
+ * @param sockfd
+ * @param my_addr
+ * @param addrlen
+ * @return
+ */
+int sip_bind(int sockfd,const struct sockaddr *my_addr,socklen_t addrlen);
+
+/**
+ * socket 连接函数
+ * @param sockfd
+ * @param serv_addr
+ * @param addrlen
+ * @return
+ */
+int sip_connect(int sockfd,const struct sockaddr *serv_addr,socklen_t addrlen);
+
+/**
+ * socket 接收数据函数
+ * @param s
+ * @param buf
+ * @param len
+ * @param flags
+ * @param from
+ * @param fromlen
+ * @return
+ */
+size_t sip_recvfrom(int s,void *buf,size_t len,int flags,
+        struct sockaddr *from,socklen_t *fromlen);
+/**
+ * socket 发送数据的函数
+ * @param s
+ * @param buf
+ * @param len
+ * @param flags
+ * @param to
+ * @param tolen
+ * @return
+ */
+ssize_t sip_sendto(int s,const void *buf,size_t len,int flags,
+        const struct sockaddr *to,socklen_t tolen);
+
+int alloc_socket(struct sock *sock);
+
+void sip_sock_delete(struct sock *sock);
+
+struct sip_socket *get_socket(int s);
 
 #endif //SIP_SIP_SOCKET_H
