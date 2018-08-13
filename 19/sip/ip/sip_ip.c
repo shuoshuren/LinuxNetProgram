@@ -361,6 +361,16 @@ EXITin_addr_isbroadcast:
     return retval;
 }
 
+/**
+ * IP是否是多播
+ * @param dev
+ * @param ip
+ * @return
+ */
+bool ip_is_multicast( __uint32_t ip){
+    return false;
+}
+
 bool sip_chksum(__uint8_t *raw, int len) {
     return 0;
 }

@@ -116,6 +116,14 @@ bool sip_chksum(__uint8_t *raw, int len);
 bool ip_is_broadcast(struct net_device *dev, __uint32_t ip);
 
 /**
+ * IP是否是多播
+ * @param dev
+ * @param ip
+ * @return
+ */
+bool ip_is_multicast( __uint32_t ip);
+
+/**
  * 重组
  * @param skb
  * @return
